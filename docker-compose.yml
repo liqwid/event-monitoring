@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  events-db:
+    container_name: events-db
+    image: postgres
+    environment:
+      - POSTGRES_DB=events
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2m
+      timeout: 30s
+      retries: 3
+  
+  events-service:
+    container_name: events-service
+    build: ./
+    volumes:
+      - '.:/app'
+    ports:
+      - '3000:3000'
+    environment:
+      - TYPEORM_CONNECTION=postgres
+      - TYPEORM_HOST=events-db
+      - TYPEORM_USERNAME=postgres
+      - TYPEORM_DATABASE=events
+      - TYPEORM_PORT=5432
+      - TYPEORM_SYNCHRONIZE=true
+      - TYPEORM_LOGGING=true
+    depends_on:
+      - events-db
+    tty: true
+  
+  test:
+    container_name: test
+    image: convergeexercise_events-service:latest
+    command: yarn run:test
+    volumes:
+      - '.:/app'
+    environment:
+      - EVENTS_SERVICE_URL=http://events-service:3000
+      - TYPEORM_CONNECTION=postgres
+      - TYPEORM_HOST=events-db
+      - TYPEORM_USERNAME=postgres
+      - TYPEORM_DATABASE=events
+      - TYPEORM_PORT=5432
+    depends_on:
+      - events-service
+      - events-db
+    tty: true
