@@ -1,76 +1,43 @@
-# Backend take-home exercise for Converge
+# Event monitoring application
 
-The purpose of this exercise is to test your ability to build a basic data
-ingestion server in node.js.
+### Install
 
-The Converge Platform ingests sensor data from our customers' sites (these
-could be construction sites, factories, oil wells, etc.), does some processing
-(including alerting users for anomalous values) on them, and stores them,
-allowing them to be served from an HTTP API. This exercise will see you building
-a basic version of the infrastructure required to do this.
+1.  Install node https://nodejs.org/en/, node 8 is required
+2.  Install yarn globally `npm i -g yarn`
+3.  Install packages `yarn`
 
-## Part one: Data ingestion
+## Launch
 
-The most basic requirement of the application is that it can ingest the data
-from sensors, storing them in some form of persistent storage such that these
-data can later be queried and retrieved. You will be expected to justify your
-choice of persistent storage.
+1.  Run app `yarn start`
+2.  Endpoint avaiable at `http://localhost:3000`
 
-Sensors will send data over HTTP, by making a request to `PUT /data`, with the
-following request body:
+### Tests
 
-    {
-        sensorId: string,
-        time:     int,
-        value:    float,
-    }
+1.  Run `yarn test`
 
-This endpoint should exhibit the following behaviour:
+### API
 
-* Return error 400 if the packet does not contain `sensorId`;
-* Return error 400 if the packet does not contain `time`;
-* Return error 409 if the packet is a duplicate  - `(sensorId, time)` pairings should
-  be unique;
-* Return 204 if the packet structure is valid, and the packet was successfully
-  stored in the persistent storage.
+`PUT /data` Event ingestion
 
-## Part two: retrieving data
+```ts
+interface Event {
+  sensorId: int;
+  time: int;
+  value?: float;
+}
+```
 
-For these data to be useful, a client (e.g. a web app) must be able to query and
-retrieve them. You should create an endpoint which allows a client to retrieve
-data from a sensor. The endpoint should return suitable status codes, and the
-body of the request should be returned as JSON. An example of a suitable
-endpoint would be:
+`GET /data?[sensorId=int][since=int][until=int]` Event querying
 
-    GET /data
+`GET POST PUT DELETE /thresholds` Event threshold values crud,
+notification will be sent to the threshold address in case of threshold overflow upon event ingestion
 
-With parameters:
-
-* `sensorId`: the sensor id for which to query data;
-* `since`: a lower bound on the time of the data;
-* `until`: an upper bound on the time of the data.
-
-## Part three: threshold alerts
-
-Often, customers want to know if something is wrong, and therefore your
-application should have the ability to configure thresholds for individual
-sensors which can send a message (e.g. via email or SMS) when that threshold is
-tripped. For example, if the pressure on a fuel tank is too high it could
-explode, or if a pipe is too cold it could burst.
-
-## Requirements
-
-The solution should be made available to us as a git repository (whether hosted
-or merely in an archive is up to you). It should be installable and runnable
-using the basic `npm` commands `npm install` and `npm start`.
-
-## Included files
-
-1. README.md (this file)
-2. .eslintrc (eslint config to which it would be helpful to adhere)
-3. package.json
-
-## Questions etc.
-
-I am always happy to answer any questions you may have. Please email me at
-<gideon@converge.io> if you need anything clarified.
+```ts
+interface Threshold {
+  sensorId: int;
+  value: float;
+  notificationType: "email" | "sms";
+  email?: string;
+  phone?: string;
+}
+```
