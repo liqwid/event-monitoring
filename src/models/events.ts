@@ -11,7 +11,7 @@ export const EVENTS_ENDPOINT = "/data";
 })
 @Unique(["sensorId", "time"])
 export class EventModel {
-  @PrimaryGeneratedColumn("uuid") id: string;
+  @PrimaryGeneratedColumn("uuid") id?: string;
 
   @IsInt()
   @Index()
@@ -26,5 +26,5 @@ export class EventModel {
   @ValidateIf(({ value }) => value !== undefined)
   @IsNumber()
   @Column("float", { nullable: true })
-  value: number;
+  value?: number;
 }

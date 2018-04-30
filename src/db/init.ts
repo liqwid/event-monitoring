@@ -1,5 +1,6 @@
 import { createConnection, getConnectionOptions, Connection } from "typeorm";
 import { EventModel } from "models/events";
+import { ThresholdModel } from "models/thresholds";
 
 /**
  * Initializaes db connection
@@ -10,6 +11,6 @@ export async function initDb(): Promise<Connection> {
   // Merging connection options with entities
   return await createConnection({
     ...options,
-    entities: [EventModel],
+    entities: [EventModel, ThresholdModel],
   });
 }
